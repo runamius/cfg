@@ -16,7 +16,7 @@ type User struct {
 
 type Room struct {
 	ID          uuid.UUID `json:"id"`
-	Name        uuid.UUID `json:"name"`
+	Name        string    `json:"name"`
 	Description *string   `json:"description,omitempty"`
 	Capacity    *int      `json:"capacity,omitempty"`
 	CreatedAt   time.Time `json:"createdAt"`

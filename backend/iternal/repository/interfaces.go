@@ -16,7 +16,7 @@ type UserRepo interface {
 
 type RoomRepo interface {
 	Create(ctx context.Context, room *models.Room) error
-	GetByID(ctx context.Context, id *models.Room) (*models.Room, error)
+	GetByID(ctx context.Context, id uuid.UUID) (*models.Room, error)
 	GetAll(ctx context.Context) ([]*models.Room, error)
 }
 

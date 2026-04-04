@@ -36,5 +36,5 @@ type BookingRepo interface {
 	Cancel(ctx context.Context, bookingID uuid.UUID) error
 	GetByID(ctx context.Context, id uuid.UUID) (*models.Booking, error)
 	GetByUser(ctx context.Context, userID uuid.UUID) ([]*models.Booking, error)
-	GetALl(ctx context.Context, page int, pageSize int) ([]*models.Booking, error)
+	GetAll(ctx context.Context, page int, pageSize int) ([]*models.Booking, int, error)
 }

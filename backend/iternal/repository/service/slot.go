@@ -13,14 +13,14 @@ import (
 )
 
 type SlotService struct {
-	slotRepo     repository.SlotsRepo
+	slotsRepo    repository.SlotsRepo
 	scheduleRepo repository.ScheduleRepo
 	roomRepo     repository.RoomRepo
 }
 
 func NewSlotService(slotRepo repository.SlotsRepo, scheduleRepo repository.ScheduleRepo, roomRepo repository.RoomRepo) *SlotService {
 	return &SlotService{
-		slotRepo:     slotRepo,
+		slotsRepo:    slotRepo,
 		scheduleRepo: scheduleRepo,
 		roomRepo:     roomRepo,
 	}
@@ -91,7 +91,7 @@ func (service *SlotService) GetFreeSlots(ctx context.Context, roomID uuid.UUID, 
 		return nil, err
 	}
 
-	existing, err := service.slotRepo.GetByRoomAndDate(ctx, roomID, date)
+	existing, err := service.slotsRepo.GetByRoomAndDate(ctx, roomID, date)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (service *SlotService) GetFreeSlots(ctx context.Context, roomID uuid.UUID, 
 		return nil, err
 	}
 
-	err = service.slotRepo.CreateSlots(ctx, slots)
+	err = service.slotsRepo.CreateSlots(ctx, slots)
 	if err != nil {
 		return nil, fmt.Errorf("create slots: %w", err)
 	}

@@ -26,8 +26,8 @@ type Schedule struct {
 	ID         uuid.UUID `json:"id"`
 	RoomID     uuid.UUID `json:"roomId"`
 	DaysOfWeek []int     `json:"daysOfWeek"`
-	StartTime  time.Time `json:"startTime"`
-	EndTime    time.Time `json:"endTime"`
+	StartTime  string    `json:"startTime"`
+	EndTime    string    `json:"endTime"`
 }
 
 type Slot struct {

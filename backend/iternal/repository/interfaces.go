@@ -20,9 +20,9 @@ type RoomRepo interface {
 	GetAll(ctx context.Context) ([]*models.Room, error)
 }
 
-type SheduleRepo interface {
-	Create(ctx context.Context, shedule *models.Shedule) error
-	GetByRoomID(ctx context.Context, roomID uuid.UUID) (*models.Shedule, error)
+type ScheduleRepo interface {
+	Create(ctx context.Context, shedule *models.Schedule) error
+	GetByRoomID(ctx context.Context, roomID uuid.UUID) (*models.Schedule, error)
 }
 
 type SlotsRepo interface {

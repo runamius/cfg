@@ -22,7 +22,7 @@ type Room struct {
 	CreatedAt   time.Time `json:"createdAt"`
 }
 
-type Shedule struct {
+type Schedule struct {
 	ID         uuid.UUID `json:"id"`
 	RoomID     uuid.UUID `json:"roomId"`
 	DaysOfWeek []int     `json:"daysOfWeek"`

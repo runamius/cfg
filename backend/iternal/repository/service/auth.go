@@ -4,6 +4,7 @@ import (
 	"avito/iternal/models"
 	"avito/iternal/repository"
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -34,8 +35,8 @@ func (service *AuthService) generateToken(userID, role string) (string, error) {
 
 func (service *AuthService) ParseToken(tokenString string) (string, string, error) {
 	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
-		if t.Method != jwt.SigningMethodHS256 {
-			return nil, fmt.Errorf("unexpected signing method")
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
 		}
 		return service.jwtSecret, nil
 	})
@@ -97,7 +98,10 @@ func (service *AuthService) Register(ctx context.Context, email, password, role 
 	}
 	err = service.userRepo.Create(ctx, user)
 	if err != nil {
-		return nil, fmt.Errorf("Register create: %w", err)
+		if errors.Is(err, models.ErrAlreadyExists) {
+			return nil, models.ErrInvalidInput
+		}
+		return nil, err
 	}
 	return user, nil
 }
@@ -109,7 +113,7 @@ func (service *AuthService) Login(ctx context.Context, email, password string) (
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
-		return "", models.ErrAlreadyExists
+		return "", models.ErrInvalidCredentials
 	}
 
 	return service.generateToken(user.ID.String(), user.Role)

@@ -102,7 +102,7 @@ func (service *BookingService) CancelBooking(ctx context.Context, bookingID, use
 		return nil, models.ErrForbidden
 	}
 
-	if booking.Status == "canceled" {
+	if booking.Status == "cancelled" {
 		return booking, nil
 	}
 
@@ -111,6 +111,6 @@ func (service *BookingService) CancelBooking(ctx context.Context, bookingID, use
 		return nil, err
 	}
 
-	booking.Status = "canceled"
+	booking.Status = "cancelled"
 	return booking, nil
 }

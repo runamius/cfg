@@ -68,7 +68,6 @@ func doRequest(t *testing.T, method, path, token string, body interface{}) (*htt
 	return resp, result
 }
 
-// setupRoomWithSchedule creates a room and schedule via admin token and returns the roomID.
 func setupRoomWithSchedule(t *testing.T, adminToken string) string {
 	t.Helper()
 
@@ -99,11 +98,9 @@ func setupRoomWithSchedule(t *testing.T, adminToken string) string {
 	return roomID
 }
 
-// getFirstFreeSlot fetches free slots for a room on a future date and returns the first slot ID.
 func getFirstFreeSlot(t *testing.T, roomID, token string) string {
 	t.Helper()
 
-	// Try the next 7 days to find a day with free slots
 	for i := 1; i <= 7; i++ {
 		date := time.Now().UTC().AddDate(0, 0, i).Format("2006-01-02")
 		resp, result := doRequest(t, http.MethodGet, "/rooms/"+roomID+"/slots/list?date="+date, token, nil)
@@ -122,20 +119,16 @@ func getFirstFreeSlot(t *testing.T, roomID, token string) string {
 	return ""
 }
 
-// TestE2E_FullBookingFlow tests: create room → create schedule → get slots → create booking.
 func TestE2E_FullBookingFlow(t *testing.T) {
 	adminToken := getToken(t, "admin")
 	userToken := getToken(t, "user")
 
-	// Step 1: Create room and schedule as admin
 	roomID := setupRoomWithSchedule(t, adminToken)
 	fmt.Printf("Created room: %s\n", roomID)
 
-	// Step 2: Get free slots as user
 	slotID := getFirstFreeSlot(t, roomID, userToken)
 	fmt.Printf("Got free slot: %s\n", slotID)
 
-	// Step 3: Create booking as user
 	resp, result := doRequest(t, http.MethodPost, "/bookings/create", userToken, map[string]interface{}{
 		"slotId": slotID,
 	})
@@ -157,7 +150,6 @@ func TestE2E_FullBookingFlow(t *testing.T) {
 
 	fmt.Printf("Created booking: %s (status: %s)\n", bookingID, status)
 
-	// Step 4: Verify booking appears in user's booking list
 	resp, result = doRequest(t, http.MethodGet, "/bookings/my", userToken, nil)
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("list my bookings: expected 200, got %d: %v", resp.StatusCode, result)
@@ -181,12 +173,10 @@ func TestE2E_FullBookingFlow(t *testing.T) {
 	}
 }
 
-// TestE2E_CancelBooking tests the cancel booking flow including idempotency.
 func TestE2E_CancelBooking(t *testing.T) {
 	adminToken := getToken(t, "admin")
 	userToken := getToken(t, "user")
 
-	// Setup: create room, schedule, and a booking
 	roomID := setupRoomWithSchedule(t, adminToken)
 
 	slotID := getFirstFreeSlot(t, roomID, userToken)
@@ -202,7 +192,6 @@ func TestE2E_CancelBooking(t *testing.T) {
 	bookingID := bookingData["id"].(string)
 	fmt.Printf("Created booking for cancellation test: %s\n", bookingID)
 
-	// Step 1: Cancel the booking
 	resp, result = doRequest(t, http.MethodPost, "/bookings/"+bookingID+"/cancel", userToken, nil)
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("cancel booking: expected 200, got %d: %v", resp.StatusCode, result)
@@ -219,14 +208,12 @@ func TestE2E_CancelBooking(t *testing.T) {
 	}
 	fmt.Printf("Cancelled booking %s (status: %s)\n", bookingID, status)
 
-	// Step 2: Verify the slot is free again
 	date := time.Now().UTC().AddDate(0, 0, 1).Format("2006-01-02")
 	resp, result = doRequest(t, http.MethodGet, "/rooms/"+roomID+"/slots/list?date="+date, userToken, nil)
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("list slots after cancel: expected 200, got %d: %v", resp.StatusCode, result)
 	}
 
-	// Step 3: Cancel the same booking again (idempotency check)
 	resp, result = doRequest(t, http.MethodPost, "/bookings/"+bookingID+"/cancel", userToken, nil)
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("cancel booking (idempotent): expected 200, got %d: %v", resp.StatusCode, result)

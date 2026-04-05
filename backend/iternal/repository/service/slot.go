@@ -26,7 +26,6 @@ func NewSlotService(slotRepo repository.SlotsRepo, scheduleRepo repository.Sched
 	}
 }
 
-// ([01]?[0-9]|2[0-3]):[0-5][0-9]
 func parseTimeStr(s string) (int, int, error) {
 	parts := strings.Split(s, ":")
 	if len(parts) != 2 {
@@ -80,7 +79,7 @@ func generateSlots(roomID uuid.UUID, date time.Time, startTime, endTime string) 
 func (service *SlotService) GetFreeSlots(ctx context.Context, roomID uuid.UUID, date time.Time) ([]*models.Slot, error) {
 	_, err := service.roomRepo.GetByID(ctx, roomID)
 	if err != nil {
-		return nil, models.ErrInvalidInput
+		return nil, models.ErrNotFound
 	}
 
 	schedule, err := service.scheduleRepo.GetByRoomID(ctx, roomID)
@@ -89,6 +88,21 @@ func (service *SlotService) GetFreeSlots(ctx context.Context, roomID uuid.UUID, 
 	}
 	if err != nil {
 		return nil, err
+	}
+
+	isoWeekday := int(date.Weekday())
+	if isoWeekday == 0 {
+		isoWeekday = 7
+	}
+	scheduledDay := false
+	for _, d := range schedule.DaysOfWeek {
+		if d == isoWeekday {
+			scheduledDay = true
+			break
+		}
+	}
+	if !scheduledDay {
+		return []*models.Slot{}, nil
 	}
 
 	existing, err := service.slotsRepo.GetByRoomAndDate(ctx, roomID, date)
@@ -110,5 +124,5 @@ func (service *SlotService) GetFreeSlots(ctx context.Context, roomID uuid.UUID, 
 		return nil, fmt.Errorf("create slots: %w", err)
 	}
 
-	return slots, nil
+	return service.slotsRepo.GetByRoomAndDate(ctx, roomID, date)
 }

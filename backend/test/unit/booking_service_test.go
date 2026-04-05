@@ -79,7 +79,6 @@ func (m *MockSlotsRepo) GetByRoomAndDate(ctx context.Context, roomID uuid.UUID, 
 	return args.Get(0).([]*models.Slot), args.Error(1)
 }
 
-// Проверка что MockSlotsRepo реализует интерфейс repository.SlotsRepo
 var _ repository.SlotsRepo = (*MockSlotsRepo)(nil)
 
 func TestBookingService_CreateBooking_Success(t *testing.T) {
@@ -253,7 +252,7 @@ func TestBookingService_ListMyBookings_Success(t *testing.T) {
 
 	bookings := []*models.Booking{
 		{ID: uuid.New(), UserID: userID, Status: "active"},
-		{ID: uuid.New(), UserID: userID, Status: "canceled"},
+		{ID: uuid.New(), UserID: userID, Status: "cancelled"},
 	}
 
 	bookingRepo.On("GetByUser", ctx, userID).Return(bookings, nil)
@@ -304,7 +303,7 @@ func TestBookingService_CancelBooking_Success(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotNil(t, booking)
-	assert.Equal(t, "canceled", booking.Status)
+	assert.Equal(t, "cancelled", booking.Status)
 	bookingRepo.AssertExpectations(t)
 }
 
@@ -346,7 +345,7 @@ func TestBookingService_CancelBooking_AlreadyCanceled(t *testing.T) {
 	existingBooking := &models.Booking{
 		ID:     bookingID,
 		UserID: userID,
-		Status: "canceled",
+		Status: "cancelled",
 	}
 
 	bookingRepo.On("GetByID", ctx, bookingID).Return(existingBooking, nil)
@@ -355,7 +354,7 @@ func TestBookingService_CancelBooking_AlreadyCanceled(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotNil(t, booking)
-	assert.Equal(t, "canceled", booking.Status)
+	assert.Equal(t, "cancelled", booking.Status)
 	bookingRepo.AssertExpectations(t)
 }
 
